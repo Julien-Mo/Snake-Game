@@ -126,8 +126,8 @@ class Game():
         """
         SPEED = 0.15     #speed of snake updates (sec)
         while self.gameNotOver:
-            #complete the method implementation below
-            pass #remove this line from your implementation
+            self.move()
+            time.sleep(SPEED)
 
     def whenAnArrowKeyIsPressed(self, e) -> None:
         """ 
@@ -159,9 +159,19 @@ class Game():
             The snake coordinates list (representing its length 
             and position) should be correctly updated.
         """
-        NewSnakeCoordinates = self.calculateNewCoordinates()
-        #complete the method implementation below
-
+        newSnakeCoordinates = self.calculateNewCoordinates()
+        if self.isGameOver(newSnakeCoordinates):
+            return
+        
+        self.snakeCoordinates.append(newSnakeCoordinates)
+        x1, y1, x2, y2 = self.preyCoordinates
+        if x1 <= newSnakeCoordinates[0] <= x2 and y1 <= newSnakeCoordinates[1] <= y2:
+            self.score += 1
+            self.queue.put({"score": self.score})
+            self.createNewPrey()
+        else:
+            self.snakeCoordinates.pop(0)
+        self.queue.put({"move": self.snakeCoordinates})
 
     def calculateNewCoordinates(self) -> tuple:
         """
@@ -173,10 +183,16 @@ class Game():
             It is used by the move() method.    
         """
         lastX, lastY = self.snakeCoordinates[-1]
-        #complete the method implementation below
+        if self.direction == "Left":
+            return (lastX - SNAKE_ICON_WIDTH, lastY)
+        elif self.direction == "Right":
+            return (lastX + SNAKE_ICON_WIDTH, lastY)
+        elif self.direction == "Up":
+            return (lastX, lastY - SNAKE_ICON_WIDTH)
+        elif self.direction == "Down":
+            return (lastX, lastY + SNAKE_ICON_WIDTH)
 
-
-    def isGameOver(self, snakeCoordinates) -> None:
+    def isGameOver(self, snakeCoordinates: tuple) -> None:
         """
             This method checks if the game is over by 
             checking if now the snake has passed any wall
@@ -185,7 +201,9 @@ class Game():
             field and also adds a "game_over" task to the queue. 
         """
         x, y = snakeCoordinates
-        #complete the method implementation below
+        if snakeCoordinates in self.snakeCoordinates or y not in range(0, WINDOW_HEIGHT) or x not in range(0, WINDOW_WIDTH):
+            self.gameNotOver = False
+            self.queue.put({"game_over": True})
 
     def createNewPrey(self) -> None:
         """ 
@@ -198,16 +216,20 @@ class Game():
             To make playing the game easier, set the x and y to be THRESHOLD
             away from the walls. 
         """
-        THRESHOLD = 15   #sets how close prey can be to borders
-        #complete the method implementation below
+        THRESHOLD = 15
+        x = random.randint(THRESHOLD, WINDOW_WIDTH - THRESHOLD)
+        y = random.randint(THRESHOLD, WINDOW_HEIGHT - THRESHOLD)
+        halfWidth = PREY_ICON_WIDTH // 2
+        self.preyCoordinates = (x - halfWidth, y - halfWidth, 
+                                x + halfWidth, y + halfWidth)
+        self.queue.put({"prey": self.preyCoordinates})
 
 
 if __name__ == "__main__":
-    #some constants for our GUI
     WINDOW_WIDTH = 500           
     WINDOW_HEIGHT = 300 
     SNAKE_ICON_WIDTH = 15
-    #add the specified constant PREY_ICON_WIDTH here     
+    PREY_ICON_WIDTH = 15 
 
     BACKGROUND_COLOUR = "green"   #you may change this colour if you wish
     ICON_COLOUR = "yellow"        #you may change this colour if you wish
