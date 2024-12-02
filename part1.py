@@ -109,8 +109,7 @@ class Game():
         #starting length and location of the snake
         #note that it is a list of tuples, each being an
         # (x, y) tuple. Initially its size is 5 tuples.       
-        self.snakeCoordinates = [(495, 55), (485, 55), (475, 55),
-                                 (465, 55), (455, 55)]
+        self.snakeCoordinates = [(WINDOW_WIDTH//2, WINDOW_HEIGHT//2),(WINDOW_WIDTH//2-SNAKE_ICON_WIDTH, WINDOW_HEIGHT//2),(WINDOW_WIDTH//2-SNAKE_ICON_WIDTH*2, WINDOW_HEIGHT//2),]
         #initial direction of the snake
         self.direction = "Left"
         self.gameNotOver = True
@@ -216,9 +215,12 @@ class Game():
             To make playing the game easier, set the x and y to be THRESHOLD
             away from the walls. 
         """
-        THRESHOLD = 15
-        x = random.randint(THRESHOLD, WINDOW_WIDTH - THRESHOLD)
-        y = random.randint(THRESHOLD, WINDOW_HEIGHT - THRESHOLD)
+        THRESHOLD = SNAKE_ICON_WIDTH
+        while(True): #Loop until prey x and y is not on snake
+            x = random.randint(THRESHOLD // SNAKE_ICON_WIDTH, (WINDOW_WIDTH - THRESHOLD) // SNAKE_ICON_WIDTH) * SNAKE_ICON_WIDTH        #The Prey can spawn anywhere on the canvas but is snapped to the grid
+            y = random.randint(THRESHOLD // SNAKE_ICON_WIDTH, (WINDOW_HEIGHT - THRESHOLD) // SNAKE_ICON_WIDTH) * SNAKE_ICON_WIDTH       #This is more visually appealing
+            if not (x,y) in self.snakeCoordinates:
+                break
         halfWidth = PREY_ICON_WIDTH // 2
         self.preyCoordinates = (x - halfWidth, y - halfWidth, 
                                 x + halfWidth, y + halfWidth)
@@ -226,13 +228,14 @@ class Game():
 
 
 if __name__ == "__main__":
-    WINDOW_WIDTH = 500           
-    WINDOW_HEIGHT = 300 
-    SNAKE_ICON_WIDTH = 15
-    PREY_ICON_WIDTH = 15 
+     
+    SNAKE_ICON_WIDTH = 16
+    PREY_ICON_WIDTH = 16
+    WINDOW_WIDTH = 36*SNAKE_ICON_WIDTH          #The window width and height must be even multiples of the snake width 
+    WINDOW_HEIGHT = 20*SNAKE_ICON_WIDTH         #for the grid the snake moves on to properly align with the window
 
-    BACKGROUND_COLOUR = "green"   #you may change this colour if you wish
-    ICON_COLOUR = "yellow"        #you may change this colour if you wish
+    BACKGROUND_COLOUR = "dark green"   #you may change this colour if you wish
+    ICON_COLOUR = "gold"        #you may change this colour if you wish
 
     gameQueue = queue.Queue()     #instantiate a queue object using python's queue class
 
